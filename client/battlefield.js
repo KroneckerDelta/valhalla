@@ -1,4 +1,3 @@
-
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
 
@@ -20,7 +19,7 @@ document.body.appendChild(canvas);
 
 function getVikings() {
 
-    return fetch('http://52.58.199.76:8080/api/vikings');
+    return fetch('http://localhost:8080/api/vikings');
 
 }
 
@@ -32,14 +31,14 @@ function renderVikings(vikings) {
         }
     }
 
-    vikings.forEach(function(viking) {
+    vikings.forEach(function (viking) {
 
         var x = viking.position.x;
         var y = viking.position.y;
 
         var fontSize = 15;
         ctx.font = fontSize + "px Arial";
-        
+
         ctx.fillText(viking.name, x * unitSize - 20, y * unitSize - 5);
         ctx.fillText(viking.level, x * unitSize + 3, y * unitSize + fontSize + 18);
 
@@ -51,7 +50,7 @@ function renderVikings(vikings) {
 
 function displayTheBest(vikings) {
 
-    var bestViking = vikings.reduce(function(candidate, current) {
+    var bestViking = vikings.reduce(function (candidate, current) {
 
         return candidate.level > current.level ? candidate : current;
 
@@ -71,16 +70,39 @@ function displayTheBest(vikings) {
 function main() {
 
     getVikings()
-    .then(function(response) {
+        .then(function (response) {
 
-        return response.json().then(function(json) {
-            var vikings = json.vikings;
-            renderVikings(vikings);
-            displayTheBest(vikings);
+            return response.json().then(function (json) {
+                var vikings = json.vikings;
+                renderVikings(vikings);
+                displayTheBest(vikings);
+                displayList(vikings);
+            });
+
         });
-    
+
+}
+
+function displayList(vikings) {
+    document.getElementById('players').innerHTML = '';
+
+    vikings.forEach(function (viking) {
+
+
+
+        document.getElementById('players').innerHTML += '<li>' +
+            '<span>' + viking.kills + '</span>' + ' / ' +
+            '<span>' + viking.name + '</span>' +
+            '</li>';
+
     });
 
+
+
+
+    for (var prop in vikings) {
+
+    }
 }
 
 main();
