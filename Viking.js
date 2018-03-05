@@ -12,19 +12,26 @@ function Viking() {
     this.level = 1;
     this.health = 2;
     this.kills = 0;
-    this.action = {order: 'stop'};
-    this.position = {x: 0, y: 0};
+    this.killed = 0;
+    this.action = {
+        order: 'stop'
+    };
+    this.position = {
+        x: 0,
+        y: 0
+    };
 
 }
 
 Viking.prototype.parse = function (withId) {
 
     let vikingJSON = {
-        name:     this.name,
-        level:    this.level,
-        health:   this.health,
-        kills:    this.kills,
-        action:   this.action,
+        name: this.name,
+        level: this.level,
+        health: this.health,
+        kills: this.kills,
+        killed: this.killed,
+        action: this.action,
         position: this.position
     };
 
@@ -85,5 +92,11 @@ Viking.prototype.isDead = function () {
 
     return this.health <= 0;
 };
+
+Viking.prototype.increasKilled = function () {
+
+    this.killed += 1;
+};
+
 
 module.exports = Viking;

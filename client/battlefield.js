@@ -92,6 +92,8 @@ function displayList(vikings) {
 
         document.getElementById('players').innerHTML += '<li>' +
             '<span>' + viking.kills + '</span>' + ' / ' +
+            '<span>' + viking.killed + '</span>' + ' / ' +
+            '<span>' + viking.health + '</span>' + ' / ' +
             '<span>' + viking.name + '</span>' +
             '</li>';
 

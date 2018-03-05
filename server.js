@@ -8,7 +8,9 @@ let io = require('socket.io')(http);
 let bodyParser = require('body-parser');
 
 app.use(cors());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(bodyParser.json());
 
 let port = 8080;
@@ -63,7 +65,7 @@ let findVikingsByOrder = function (order) {
             if (v.action.order === order) {
                 vikings.push(v);
             }
-        } catch(e) {}
+        } catch (e) {}
 
     });
 
@@ -91,43 +93,70 @@ function getRandomInt(min, max) {
 let router = express.Router();
 
 router.get('/', function (req, res) {
-    res.json({message: 'It works!'});
+    res.json({
+        message: 'It works!'
+    });
 });
+
+/**
+ * try to place a viking.
+ * @param {*} viking 
+ * @param {*} name 
+ * @param {*} res 
+ */
+function placeViking(viking, name) {
+
+
+
+
+    let maxTries = 10;
+    let position = {
+        x: getRandomInt(0, mapSizeX),
+        y: getRandomInt(0, mapSizeY)
+    };
+
+    while (findVikingByPosition(position) && maxTries--) {
+        position = {
+            x: getRandomInt(0, mapSizeX),
+            y: getRandomInt(0, mapSizeY)
+        };
+    }
+
+    if (maxTries === 0) {
+        res.json({
+            error: 'could not find empty spot for you viking, please try again'
+        });
+        return;
+    }
+
+    viking.position = position;
+
+    viking.name = name;
+
+
+
+
+}
 
 router.route('/vikings')
 
     .post(function (req, res) {
-
         try {
-
             let viking = new Viking();
-
-            let maxTries = 10;
-            let position = {x: getRandomInt(0, mapSizeX), y: getRandomInt(0, mapSizeY)};
-
-            while (findVikingByPosition(position) && maxTries--) {
-                position = {x: getRandomInt(0, mapSizeX), y: getRandomInt(0, mapSizeY)};
-            }
-
-            if (maxTries === 0) {
-                res.json({error: 'could not find empty spot for you viking, please try again'});
-                return;
-            }
-
-            viking.position = position;
-
-            viking.name = req.body.name;
-
+            placeViking(viking, req.body.name, res);
             vikingsList.push(viking);
 
             let sendWithId = true;
             res.json(viking.parse(sendWithId));
 
-            io.sockets.emit('vikingsUpdate', {vikings: parseVikings()});
-
+            io.sockets.emit('vikingsUpdate', {
+                vikings: parseVikings()
+            });
         } catch (e) {
             console.log(e);
-            res.status(400).json({error:'invalid command'});
+            res.status(400).json({
+                error: 'invalid command'
+            });
         }
     })
 
@@ -137,8 +166,10 @@ router.route('/vikings')
 
             let viking = findVikingById(req.body.id);
 
-            if(!viking){
-                res.status(400).json({error:'deadViking'});
+            if (!viking) {
+                res.status(400).json({
+                    error: 'deadViking'
+                });
                 return;
             }
 
@@ -148,7 +179,9 @@ router.route('/vikings')
 
         } catch (e) {
             console.log(e);
-            res.status(400).json({error:'invalid command'});
+            res.status(400).json({
+                error: 'invalid command'
+            });
         }
     })
 
@@ -156,11 +189,15 @@ router.route('/vikings')
 
         try {
 
-            res.json({vikings: parseVikings()});
+            res.json({
+                vikings: parseVikings()
+            });
 
         } catch (e) {
             console.log(e);
-            res.status(400).json({error:'invalid command'});
+            res.status(400).json({
+                error: 'invalid command'
+            });
         }
     });
 
@@ -173,8 +210,10 @@ router.route('/vikings/:id')
 
             let viking = findVikingById(req.params.id);
 
-            if(!viking){
-                res.status(400).json({error:'deadViking'});
+            if (!viking) {
+                res.status(400).json({
+                    error: 'deadViking'
+                });
                 return;
             }
 
@@ -182,12 +221,14 @@ router.route('/vikings/:id')
 
         } catch (e) {
             console.log(e);
-            res.status(400).json({error:'invalid command'});
+            res.status(400).json({
+                error: 'invalid command'
+            });
         }
     });
 
 app.use('/api', router);
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     console.log(err);
     // does not work...
 });
@@ -206,6 +247,7 @@ let handleVikingAttack = function (viking) {
 
             if (otherViking.isDead()) {
                 viking.kills += 1;
+                otherViking.increasKilled();
             }
 
         }
@@ -241,7 +283,7 @@ let handleVikingHeal = function (viking) {
 
     try {
 
-        viking.increaseHitPoints( viking.level );
+        viking.increaseHitPoints(viking.level);
 
     } catch (e) {
         console.log(e);
@@ -249,7 +291,7 @@ let handleVikingHeal = function (viking) {
 
 };
 
-let disposeBodies = function() {
+let disposeBodies = function () {
 
     let i = vikingsList.length;
 
@@ -258,12 +300,15 @@ let disposeBodies = function() {
         let viking = vikingsList[i];
 
         if (viking.isDead()) {
-            vikingsList.splice(i, 1);
+            viking.health = 2;
+
+            placeViking(viking, viking.name, null);
+            // vikingsList.splice(i, 1);
         }
     }
 };
 
-let resetVikingsOrders = function() {
+let resetVikingsOrders = function () {
 
     vikingsList.forEach(function (viking) {
 
@@ -274,7 +319,7 @@ let resetVikingsOrders = function() {
 
 };
 
-let levelUpVikings = function() {
+let levelUpVikings = function () {
 
     vikingsList.forEach(function (viking) {
 
@@ -288,7 +333,7 @@ let gameRound = 1;
 
 let gameUpdate = function () {
 
-    console.log('Game round '+ (gameRound++));
+    console.log('Game round ' + (gameRound++));
 
     let vikings = findVikingsByOrder('attack');
 
@@ -320,12 +365,14 @@ let gameUpdate = function () {
 
     resetVikingsOrders();
 
-    io.sockets.emit('vikingsUpdate', {vikings: parseVikings()});
+    io.sockets.emit('vikingsUpdate', {
+        vikings: parseVikings()
+    });
 
 };
 
 setInterval(gameUpdate, 1000);
 
-http.listen(port, function(){
-    console.log('listening on '+ port);
+http.listen(port, function () {
+    console.log('listening on ' + port);
 });
