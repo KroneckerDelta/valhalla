@@ -11,6 +11,7 @@ function Viking() {
     this.name = 'Bob';
     this.level = 1;
     this.health = 2;
+    this.experience = 0;
     this.kills = 0;
     this.killed = 0;
     this.action = {
@@ -30,6 +31,7 @@ Viking.prototype.parse = function (withId) {
         level: this.level,
         health: this.health,
         kills: this.kills,
+        experience: this.experience,
         killed: this.killed,
         action: this.action,
         position: this.position
@@ -67,10 +69,10 @@ Viking.prototype.getActionPosition = function () {
 Viking.prototype.checkForLevelUp = function () {
 
 
-    if (this.kills > Math.pow(2, this.level - 1)) {
+    if (this.experience > Math.pow(2, this.level - 1)) {
 
         this.level += 1;
-        this.kills = 0;
+        this.experience = 0;
         this.increaseHitPoints(2);
 
     }
