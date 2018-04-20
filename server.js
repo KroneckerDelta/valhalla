@@ -8,6 +8,13 @@ let io = require('socket.io')(http);
 let bodyParser = require('body-parser');
 
 app.use(cors());
+
+app.all('/*', function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+});
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -247,6 +254,7 @@ let handleVikingAttack = function (viking) {
 
             if (otherViking.isDead()) {
                 viking.kills += 1;
+                viking.experience += 1;
                 otherViking.increasKilled();
             }
 

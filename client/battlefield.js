@@ -19,7 +19,7 @@ document.body.appendChild(canvas);
 
 function getVikings() {
 
-    return fetch('http://localhost:8080/api/vikings');
+    return fetch('/api/vikings');
 
 }
 
